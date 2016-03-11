@@ -119,11 +119,13 @@ class Recurrent(MaskedLayer):
 
     def __init__(self, weights=None,
                  return_sequences=False, go_backwards=False, stateful=False,
-                 input_dim=None, input_length=None, **kwargs):
+                 input_dim=None, input_length=None,
+                 truncate_gradient=-1, **kwargs):
         self.return_sequences = return_sequences
         self.initial_weights = weights
         self.go_backwards = go_backwards
         self.stateful = stateful
+        self.truncate_gradient = truncate_gradient
 
         self.input_dim = input_dim
         self.input_length = input_length
@@ -191,7 +193,8 @@ class Recurrent(MaskedLayer):
                                              initial_states,
                                              go_backwards=self.go_backwards,
                                              mask=mask,
-                                             constants=constants)
+                                             constants=constants,
+                                             truncate_gradient=self.truncate_gradient)
         if self.stateful:
             self.updates = []
             for i in range(len(states)):

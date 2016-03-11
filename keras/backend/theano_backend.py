@@ -467,7 +467,7 @@ def gradients(loss, variables):
 # CONTROL FLOW
 
 def rnn(step_function, inputs, initial_states,
-        go_backwards=False, mask=None, constants=None):
+        go_backwards=False, mask=None, constants=None, truncate_gradient=-1):
     '''Iterates over the time dimension of a tensor.
 
     # Arguments
@@ -535,7 +535,8 @@ def rnn(step_function, inputs, initial_states,
             sequences=[inputs, mask],
             outputs_info=[initial_output] + initial_states,
             non_sequences=constants,
-            go_backwards=go_backwards)
+            go_backwards=go_backwards,
+            truncate_gradient=truncate_gradient)
     else:
         def _step(input, *states):
             output, new_states = step_function(input, states)
@@ -546,7 +547,8 @@ def rnn(step_function, inputs, initial_states,
             sequences=inputs,
             outputs_info=[None] + initial_states,
             non_sequences=constants,
-            go_backwards=go_backwards)
+            go_backwards=go_backwards,
+            truncate_gradient=truncate_gradient)
 
     # deal with Theano API inconsistency
     if type(results) is list:
