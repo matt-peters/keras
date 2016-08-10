@@ -576,5 +576,18 @@ def test_sequential_regression():
     outer_model.fit([x, y, z], labels, nb_epoch=1)
 
 
+@keras_test
+def test_merge_output_shape():
+    def merge_func(inputs):
+        # a stub that just returns first input
+        return inputs[0]
+
+    # x and y have shape (None, 5) including batch dim
+    x = Input(shape=(5, ))
+    y = Input(shape=(5, ))
+    merged = merge([x, y], output_shape=(None, 5), mode=merge_func)
+    assert merged._keras_shape == (None, 5)
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

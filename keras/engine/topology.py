@@ -1511,6 +1511,14 @@ def merge(inputs, mode='sum', concat_axis=-1,
         if not hasattr(x, '_keras_history'):
             all_keras_tensors = False
             break
+
+    if output_shape is not None and not callable(output_shape):
+        # output_shape provided as tuple. it includes batch size, but
+        # input to Merge excludes batch size
+        out_shp = output_shape[1:]
+    else:
+        out_shp = output_shape
+
     if all_keras_tensors:
         input_layers = []
         node_indices = []
@@ -1523,7 +1531,7 @@ def merge(inputs, mode='sum', concat_axis=-1,
         merge_layer = Merge(input_layers, mode=mode,
                             concat_axis=concat_axis,
                             dot_axes=dot_axes,
-                            output_shape=output_shape,
+                            output_shape=out_shp,
                             output_mask=output_mask,
                             node_indices=node_indices,
                             tensor_indices=tensor_indices,
@@ -1533,7 +1541,7 @@ def merge(inputs, mode='sum', concat_axis=-1,
         merge_layer = Merge(mode=mode,
                             concat_axis=concat_axis,
                             dot_axes=dot_axes,
-                            output_shape=output_shape,
+                            output_shape=out_shp,
                             output_mask=output_mask,
                             name=name)
         return merge_layer(inputs)
