@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
+import tensorflow as tf
 import json
 import yaml
 import warnings
@@ -361,7 +362,12 @@ class Layer(object):
             The created weight variable.
         """
         initializer = initializers.get(initializer)
-        weight = K.variable(initializer(shape), dtype=K.floatx(), name=name)
+        with tf.variable_scope(self.name):
+            # set the variable scope to the layer's name
+            weight = weight = K.get_variable(name, shape,
+                initializer=initializer,
+                dtype=K.floatx(),
+                trainable=trainable)
         if regularizer is not None:
             self.add_loss(regularizer(weight))
         if constraint is not None:

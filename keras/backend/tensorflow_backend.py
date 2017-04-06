@@ -247,6 +247,16 @@ def to_dense(tensor):
 
 name_scope = tf.name_scope
 
+def get_variable(name, shape, initializer=None, dtype=None, trainable=True):
+    if dtype is None:
+        dtype = floatx()
+    v = tf.get_variable(name, shape=shape, initializer=initializer,
+                        dtype=_convert_string_dtype(dtype),
+                        trainable=trainable)
+    v._keras_shape = shape
+    v._uses_learning_phase = False
+    return v
+
 
 def variable(value, dtype=None, name=None):
     """Instantiates a variable and returns it.

@@ -670,6 +670,8 @@ def get(identifier):
     # Raises
         ValueError: If `identifier` cannot be interpreted.
     """
+    if identifier is None:
+        return None
     if K.backend() == 'tensorflow':
         # Wrap TF optimizer instances
         if isinstance(identifier, tf.train.Optimizer):
