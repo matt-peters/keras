@@ -3,18 +3,78 @@ import tensorflow as tf
 import numpy as np
 import six
 from . import backend as K
+from .utils.generic_utils import serialize_keras_object
+from .utils.generic_utils import deserialize_keras_object
 
 
+class Initializer(object):
+    """Initializer base class: all initializers inherit from this class.
+    """
 
-zero = zeros = tf.constant_initializer(0.0)
-one = ones = tf.constant_initializer(1.0)
-uniform = tf.random_uniform_initializer(-0.05, 0.05)
-normal = tf.random_normal_initializer(0, 0.05)
-truncated_normal = tf.truncated_normal_initializer(0, 0.05)
-orthogonal = tf.orthogonal_initializer(gain=1.0)
+    def __call__(self, shape, dtype=None):
+        raise NotImplementedError
 
+    def get_config(self):
+        return {}
 
-class VarianceScaling(object):
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+class Constant(Initializer):
+    def __init__(self, value):
+        self.value = value
+
+    def __call__(self, shape, dtype=None, **kwargs):
+        return tf.constant(self.value, shape=shape, dtype=dtype)
+    
+    def get_config(self):
+        return {'value': self.value}
+
+class RandomNormal(Initializer):
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, shape, dtype=None, **kwargs):
+        return tf.random_normal(shape, self.mean, self.std, dtype=dtype)
+
+    def get_config(self):
+        return {'mean': self.mean, 'std': self.std}
+
+class RandomUniform(Initializer):
+    def __init__(self, minval, maxval):
+        self.minval = minval
+        self.maxval = maxval
+
+    def __call__(self, shape, dtype=None, **kwargs):
+        return tf.random_uniform(shape, self.minval, self.maxval, dtype=dtype)
+
+    def get_config(self):
+       return {'minval': self.minval, 'maxval': self.maxval}
+
+class TruncatedNormal(Initializer):
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, shape, dtype=None, **kwargs):
+        return tf.truncated_normal(shape, self.mean, self.std, dtype=dtype)
+
+    def get_config(self):
+        return {'mean': self.mean, 'std': self.std}
+
+class Orthogonal(Initializer):
+    def __init__(self, gain):
+        self.gain = gain
+
+    def __call__(self, shape, dtype=None, **kwargs):
+        return tf.orthogonal_initializer(gain=self.gain)(shape, dtype=dtype)
+
+    def get_config(self):
+        return {'gain': self.gain}
+
+class VarianceScaling(Initializer):
     """Initializer capable of adapting its scale to the shape of weights.
 
     With `distribution="normal"`, samples are drawn from a truncated normal
@@ -86,6 +146,12 @@ class VarianceScaling(object):
             'seed': self.seed
         }
 
+zero = zeros = Constant(0.0)
+one = ones = Constant(1.0)
+normal = RandomNormal(0, 0.05)
+uniform = RandomUniform(-0.05, 0.05)
+truncated_normal = TruncatedNormal(0, 0.05)
+orthogonal = Orthogonal(gain=1.0)
 
 lecun_uniform = VarianceScaling(scale=1.,
                            mode='fan_in',
@@ -162,5 +228,13 @@ def get(identifier):
         raise ValueError('Could not interpret initializer identifier:',
                          identifier)
 
+def serialize(initializer):
+    return serialize_keras_object(initializer)
 
+
+def deserialize(config, custom_objects=None):
+    return deserialize_keras_object(config,
+                                    module_objects=globals(),
+                                    custom_objects=custom_objects,
+                                    printable_module_name='initializer')
 
