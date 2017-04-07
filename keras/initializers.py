@@ -22,7 +22,7 @@ class Initializer(object):
         return cls(**config)
 
 class Constant(Initializer):
-    def __init__(self, value):
+    def __init__(self, value=0.0):
         self.value = value
 
     def __call__(self, shape, dtype=None, **kwargs):
@@ -32,7 +32,7 @@ class Constant(Initializer):
         return {'value': self.value}
 
 class RandomNormal(Initializer):
-    def __init__(self, mean, std):
+    def __init__(self, mean=0.0, std=0.05):
         self.mean = mean
         self.std = std
 
@@ -43,7 +43,7 @@ class RandomNormal(Initializer):
         return {'mean': self.mean, 'std': self.std}
 
 class RandomUniform(Initializer):
-    def __init__(self, minval, maxval):
+    def __init__(self, minval=-0.05, maxval=0.05):
         self.minval = minval
         self.maxval = maxval
 
@@ -54,7 +54,7 @@ class RandomUniform(Initializer):
        return {'minval': self.minval, 'maxval': self.maxval}
 
 class TruncatedNormal(Initializer):
-    def __init__(self, mean, std):
+    def __init__(self, mean=0.0, std=0.05):
         self.mean = mean
         self.std = std
 
@@ -65,7 +65,7 @@ class TruncatedNormal(Initializer):
         return {'mean': self.mean, 'std': self.std}
 
 class Orthogonal(Initializer):
-    def __init__(self, gain):
+    def __init__(self, gain=1.0):
         self.gain = gain
 
     def __call__(self, shape, dtype=None, **kwargs):
@@ -219,7 +219,10 @@ def _compute_fans(shape, data_format='channels_last'):
 
 
 def get(identifier):
-    if isinstance(identifier, six.string_types):
+    if isinstance(identifier, dict):
+        print('dict', identifier)
+        return deserialize(identifier)
+    elif isinstance(identifier, six.string_types):
         # get it from the module
         return globals()[identifier]
     elif callable(identifier):
@@ -227,6 +230,17 @@ def get(identifier):
     else:
         raise ValueError('Could not interpret initializer identifier:',
                          identifier)
+
+
+#def get(identifier):
+#    if isinstance(identifier, six.string_types):
+#        # get it from the module
+#        return globals()[identifier]
+#    elif callable(identifier):
+#        return identifier
+#    else:
+#        raise ValueError('Could not interpret initializer identifier:',
+#                         identifier)
 
 def serialize(initializer):
     return serialize_keras_object(initializer)
