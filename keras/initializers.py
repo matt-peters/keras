@@ -220,7 +220,6 @@ def _compute_fans(shape, data_format='channels_last'):
 
 def get(identifier):
     if isinstance(identifier, dict):
-        print('dict', identifier)
         return deserialize(identifier)
     elif isinstance(identifier, six.string_types):
         # get it from the module
@@ -231,16 +230,6 @@ def get(identifier):
         raise ValueError('Could not interpret initializer identifier:',
                          identifier)
 
-
-#def get(identifier):
-#    if isinstance(identifier, six.string_types):
-#        # get it from the module
-#        return globals()[identifier]
-#    elif callable(identifier):
-#        return identifier
-#    else:
-#        raise ValueError('Could not interpret initializer identifier:',
-#                         identifier)
 
 def serialize(initializer):
     return serialize_keras_object(initializer)
