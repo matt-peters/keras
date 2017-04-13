@@ -364,7 +364,7 @@ class Layer(object):
         initializer = initializers.get(initializer)
         with tf.variable_scope(self.name):
             # set the variable scope to the layer's name
-            weight = weight = K.get_variable(name, shape,
+            weight = K.get_variable(name, shape,
                 initializer=initializer,
                 dtype=K.floatx(),
                 trainable=trainable)
