@@ -97,7 +97,8 @@ class Embedding(Layer):
             initializer=self.embeddings_initializer,
             name='embeddings',
             regularizer=self.embeddings_regularizer,
-            constraint=self.embeddings_constraint)
+            constraint=self.embeddings_constraint,
+            trainable=self.trainable)
         self.built = True
 
     def compute_mask(self, inputs, mask=None):
